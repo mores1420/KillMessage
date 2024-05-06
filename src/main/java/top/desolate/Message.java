@@ -5,7 +5,9 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -57,10 +59,21 @@ public class Message {
                 itemInfo.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,new BaseComponent[]{new TextComponent(itemNBT)}));
                 builder.append(itemInfo);
                 BaseComponent[] message=builder.create();
+
+                boolean onlyWorld=config.getBoolean("只给相同世界的玩家广播");
+                if (onlyWorld){
+                    World playerWorld=player.getWorld();
+                    Player[] onWorldPlayer=playerWorld.getPlayers().toArray(new Player[0]);
+                    for (Player player1:onWorldPlayer){
+                        player1.spigot().sendMessage(message);
+                    }
+                }else {
+                    Player[] onlinePlayers= Bukkit.getOnlinePlayers().toArray(new Player[0]);
+                    for (Player player1:onlinePlayers){
+                        player1.spigot().sendMessage(message);
+                    }
+                }
             }
         }
-
-
-
     }
 }

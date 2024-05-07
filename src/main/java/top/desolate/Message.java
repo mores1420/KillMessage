@@ -1,10 +1,7 @@
 package top.desolate;
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -21,8 +18,9 @@ public class Message {
     }
 
     /**
-     * @param item   手上的物品
-     * @param player 获取信息的玩家
+     * @param item 击杀者手上的物品
+     * @param player 被击杀者
+     * @param killer 击杀者
      */
     public void SendMessages(ItemStack item, Player player, Player killer) {
         //判断空手
@@ -50,8 +48,10 @@ public class Message {
                 if (meta.hasDisplayName()) {
                     for (BaseComponent component : TextComponent.fromLegacyText(meta.getDisplayName())) {
                         itemInfo.addExtra(component);
+                        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,new BaseComponent[]{new TextComponent(itemNBT)}));
                     }
                 } else {
+                    //获取翻译键
                     boolean tag = true;
                     if (tag) {
                         if (itemNBT.contains("Enchantments:[")) {
@@ -66,9 +66,12 @@ public class Message {
                             itemInfo.setColor(ChatColor.WHITE);
                         }
                     }
+                    String key = KillMessage.mcVersion == 12 ? nmsUtil.getTranslateKey(item) : getTranslateKey(item.getType().getKey().toString(), item.getType().isBlock());
+                    TranslatableComponent keyTranslate=new TranslatableComponent(key);
+                    keyTranslate.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,new BaseComponent[]{new TextComponent(itemNBT)}));
+                    itemInfo.addExtra(keyTranslate);
                 }
                 itemInfo.addExtra("]");
-                itemInfo.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[]{new TextComponent(itemNBT)}));
 
                 builder.append(itemInfo);
                 TextComponent andText = new TextComponent("击杀了");
@@ -98,5 +101,9 @@ public class Message {
                 }
             }
         }
+    }
+
+    private static String getTranslateKey(String id, boolean isBlock) {
+        return (isBlock ? "block." : "item.") + id.replace(':', '.');
     }
 }

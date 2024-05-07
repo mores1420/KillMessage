@@ -46,4 +46,14 @@ public class NMS {
         }
         return "{id:\"minecraft:air\"}";
     }
+
+    //物品翻译名
+    public String getTranslateKey(ItemStack item) {
+        try {
+            return NMS_ItemStack_a.invoke(OBC_CraftItemStack_asNMSCopy.invoke(OBC_CraftItemStack, item)) + ".name";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "tile.air.name";
+    }
 }

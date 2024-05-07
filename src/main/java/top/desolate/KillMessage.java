@@ -7,8 +7,9 @@ import java.io.File;
 
 public class KillMessage extends JavaPlugin {
 
-    static FileConfiguration config;
+    protected static FileConfiguration config;
     private KillListener killListener;
+    protected static int mcVersion;
 
     @Override
     public void onEnable() {
@@ -23,6 +24,8 @@ public class KillMessage extends JavaPlugin {
             }
             saveResource("config.yml", false);
         }
+        //获取版本
+        mcVersion=Integer.parseInt(getServer().getBukkitVersion().replace('-', '.').split("\\.")[1]);
         //初始化配置文件
         config = getConfig();
         try {

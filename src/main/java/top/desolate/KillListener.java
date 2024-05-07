@@ -7,17 +7,20 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class KillListener implements Listener {
-    Message message;
+    private final Message message;
+
+    public KillListener(Message message) {
+        this.message = message;
+    }
 
     @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event){
-        Player player=event.getEntity();
-        if (player.getKiller() != null){
-            Player killer=player.getKiller();
-
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        if (player.getKiller() != null) {
+            Player killer = player.getKiller();
             //获取物品
-            ItemStack itemStack=killer.getInventory().getItemInMainHand();
-            message.SendMessages(itemStack,player);
+            ItemStack itemStack = killer.getInventory().getItemInMainHand();
+            message.SendMessages(itemStack, player, killer);
         }
     }
 }

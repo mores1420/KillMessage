@@ -7,10 +7,13 @@ import java.io.File;
 
 public class KillMessage extends JavaPlugin {
 
+    static FileConfiguration config;
+    private KillListener killListener;
+
     @Override
-    public void onEnable(){
+    public void onEnable() {
         //加载配置文件
-        File configFile=new File(getDataFolder(),"config.yml");
+        File configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             boolean isCreateDir = configFile.getParentFile().mkdirs();
             //添加一个文件夹创建判断
@@ -20,17 +23,23 @@ public class KillMessage extends JavaPlugin {
             }
             saveResource("config.yml", false);
         }
+        //初始化配置文件
+        config = getConfig();
+        try {
+            NMS nmsUtil = new NMS(this);
+            Message message = new Message(nmsUtil);
+            killListener = new KillListener(message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        //注册监听器
+        getServer().getPluginManager().registerEvents(killListener, this);
         getLogger().info("KillMessage Enabled!");
     }
 
     @Override
-    public void onDisable(){
+    public void onDisable() {
         getLogger().info("Disabled!");
-    }
-
-    //获取配置文件
-    public FileConfiguration getConfig(){
-        FileConfiguration config=this.getConfig();
-        return config;
     }
 }

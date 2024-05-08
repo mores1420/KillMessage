@@ -1,6 +1,8 @@
-package top.desolate;
+package top.desolate.Utils;
 
 import org.bukkit.inventory.ItemStack;
+import top.desolate.KillMessage;
+
 import java.lang.reflect.Method;
 
 public class NMS {
@@ -38,6 +40,7 @@ public class NMS {
         }
     }
 
+    //获取物品NBT
     public String getItemNBT(ItemStack item) {
         try {
             return NMS_ItemStack_save.invoke(OBC_CraftItemStack_asNMSCopy.invoke(OBC_CraftItemStack, item), NMS_NBTTagCompound.newInstance()).toString();

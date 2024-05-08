@@ -8,17 +8,21 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import top.desolate.Utils.NMS;
+import top.desolate.Utils.YMLUtil;
 
 public class Message {
 
     private final NMS nmsUtil;
+    YMLUtil ymlUtil;
 
-    public Message(NMS nmsUtil) {
+    public Message(NMS nmsUtil,YMLUtil ymlUtil) {
         this.nmsUtil = nmsUtil;
+        this.ymlUtil=ymlUtil;
     }
 
     /**
-     * @param item 击杀者手上的物品
+     * @param item   击杀者手上的物品
      * @param player 被击杀者
      * @param killer 击杀者
      */
@@ -33,8 +37,12 @@ public class Message {
                 //构建消息文本
                 String playerName = player.getName();
                 String killerName = killer.getName();
-
+                String playerUUID = player.getUniqueId().toString();
+                String killerUUID = killer.getUniqueId().toString();
+                ComponentBuilder killerShowTextBuilder = builderNameShowText(killerUUID);
                 TextComponent killerText = new TextComponent(killerName);
+                killerText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, killerShowTextBuilder.create()));
+
                 killerText.setColor(ChatColor.GOLD);
                 killerText.setBold(true);
                 killerText.setItalic(true);
@@ -48,7 +56,7 @@ public class Message {
                 if (meta.hasDisplayName()) {
                     for (BaseComponent component : TextComponent.fromLegacyText(meta.getDisplayName())) {
                         itemInfo.addExtra(component);
-                        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,new BaseComponent[]{new TextComponent(itemNBT)}));
+                        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[]{new TextComponent(itemNBT)}));
                     }
                 } else {
                     //获取翻译键
@@ -67,8 +75,8 @@ public class Message {
                         }
                     }
                     String key = KillMessage.mcVersion == 12 ? nmsUtil.getTranslateKey(item) : getTranslateKey(item.getType().getKey().toString(), item.getType().isBlock());
-                    TranslatableComponent keyTranslate=new TranslatableComponent(key);
-                    keyTranslate.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,new BaseComponent[]{new TextComponent(itemNBT)}));
+                    TranslatableComponent keyTranslate = new TranslatableComponent(key);
+                    keyTranslate.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[]{new TextComponent(itemNBT)}));
                     itemInfo.addExtra(keyTranslate);
                 }
                 itemInfo.addExtra("]");
@@ -77,7 +85,12 @@ public class Message {
                 TextComponent andText = new TextComponent("击杀了");
                 andText.setColor(ChatColor.WHITE);
                 builder.append(andText);
+
+                //获取被击杀者KD信息
+                ComponentBuilder playerShowTextBuilder = builderNameShowText(playerUUID);
                 TextComponent playerText = new TextComponent(playerName);
+                playerText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, playerShowTextBuilder.create()));
+
                 playerText.setColor(ChatColor.DARK_RED);
                 playerText.setItalic(true);
                 playerText.setStrikethrough(true);
@@ -105,5 +118,22 @@ public class Message {
 
     private static String getTranslateKey(String id, boolean isBlock) {
         return (isBlock ? "block." : "item.") + id.replace(':', '.');
+    }
+
+    private ComponentBuilder builderNameShowText(String playerUUID) {
+        //获取KD信息
+        String playerKills = ymlUtil.getYmlValue(playerUUID+".kills");
+        String playerDeaths = ymlUtil.getYmlValue(playerUUID+".deaths");
+        // 解析字符串为 double 类型，并计算 KD 比率
+        double kill = playerKills != null ? Double.parseDouble(playerKills) : 0.0;
+        double death = playerDeaths != null ? Double.parseDouble(playerDeaths) : 0.0;
+        double ratio = death != 0 ? kill / death : 1.0; // 避免除以 0 的情况
+        String killerRatio = String.format("%.2f", ratio);
+        //构建文本
+        ComponentBuilder killKDShowText = new ComponentBuilder();
+        killKDShowText.append("击杀: " + playerKills);
+        killKDShowText.append("死亡: " + playerDeaths);
+        killKDShowText.append("KD: " + killerRatio);
+        return killKDShowText;
     }
 }

@@ -1,0 +1,5 @@
+main: top.desolate.KillMessage
+api-version: '1.16'
+name: 'DESOLATE-KillMessage'
+version: 1.0.0
+author: Mores
